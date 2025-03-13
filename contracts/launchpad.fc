@@ -1,5 +1,6 @@
 #include "imports/stdlib.fc";
 #include "imports/launchpad-utils.fc";
+#include "imports/op-codes.fc";
 
 (slice, cell, cell) load_data() inline {
     slice ds = get_data().begin_parse();
@@ -47,32 +48,41 @@
     int op = in_msg_body~load_uint(32); ;;operation
     int query_id = in_msg_body~load_uint(64);
 
-    if (op == op::init()) {
+    if (op == op::launchpad_init()) {
         admin_address = in_msg_body~load_msg_addr();
         deployed_tokens = begin_cell().end_cell(); ;;Initialize empty list
-        save_data(admin_address, content, jetton_minter_code, deployed_tokens);
+        save_data(admin_address, jetton_minter_code, deployed_tokens);
     } elseif (op == op::create_token()) { ;; Deploy Token Contract and mint specific amount of jetton token.
 
-        cell master_msg = in_msg_body~load_ref();
         int amount = in_msg_body~load_coins(); ;;ton amount
-        slice master_msg_cs = master_msg.begin_parse();
-        master_msg_cs~skip_bits(32 + 64); ;; op + query_id
-        cell content = master_msg_cs~load_ref();
+        cell content = in_msg_body~load_ref(); ;; token content
+        cell master_msg = in_msg_body~load_ref();
+        ;; slice master_msg_cs = master_msg.begin_parse();
+        ;; master_msg_cs~skip_bits(32 + 64); ;; op + query_id
+        ;; cell mint_msg = master_msg_cs~load_ref(); ;; mint msg
         slice minter_address = create_token_contract(my_address(), content, amount, jetton_minter_code, master_msg);
 
-        deployed_tokens = store_address(minter_address, deployed_tokens); ;;store newly created minter_address
+        deployed_tokens = begin_cell()
+            .store_ref(deployed_tokens)
+            .store_slice(minter_address)
+            .end_cell();
         save_data(admin_address, jetton_minter_code, deployed_tokens);
     }
-}
-
-cell store_address(slice address, cell list) {
-    return begin_cell()
-            .store_ref(list)
-            .store_slice(address)
-            .end_cell();
 }
 
 (slice, cell, cell) get_launchpad_data() method_id {
     (slice admin_address, cell jetton_minter_code, cell deployed_tokens) = load_data();
     return (admin_address, jetton_minter_code, deployed_tokens);
+}
+
+cell get_minter_address(cell content) method_id {
+    (slice admin_address, cell jetton_minter_code, cell deployed_tokens) = load_data();
+    ;; return calculate_jetton_minter_address(calculate_jetton_minter_state_init(my_address(), content, jetton_minter_code));
+    cell state_init = calculate_jetton_minter_state_init(my_address(),content,jetton_minter_code);
+    ;; return calculate_jetton_minter_address(state_init);
+    return begin_cell()
+            .store_uint(4, 3)
+            .store_int(0, 8)
+            .store_uint(cell_hash(state_init), 256)
+            .end_cell();
 }

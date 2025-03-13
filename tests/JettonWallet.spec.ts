@@ -74,8 +74,6 @@ describe('JettonWallet', () => {
     // implementation detail
     it('should deploy', async () => {
         const deployResult = await jettonMinter.sendDeploy(deployer.getSender(), toNano('100'));
-        console.log('Deployer address: ', deployer.address);
-        console.log('jettonMInter address: ', jettonMinter.address);
         expect(deployResult.transactions).toHaveTransaction({
             from: deployer.address,
             to: jettonMinter.address,
@@ -86,11 +84,8 @@ describe('JettonWallet', () => {
     it('minter admin should be able to mint jettons', async () => {
         // can mint from deployer
         let initialTotalSupply = await jettonMinter.getTotalSupply();
-        console.log('Inittial Total Supply: ', toNano('100'));
         const deployerJettonWallet = await userWallet(deployer.address);
-        console.log('Deployer Jetton Wallet: ', deployerJettonWallet);
         let initialJettonBalance = toNano('1000.23');
-        console.log('initial jetton ballance: ', initialJettonBalance);
         const mintResult = await jettonMinter.sendMint(
             deployer.getSender(),
             deployer.address,

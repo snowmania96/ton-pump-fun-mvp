@@ -7,3 +7,5 @@ int op::burn_notification() asm "0x7bdd97de PUSHINT";
 
 ;; Minter
 int op::mint() asm "21 PUSHINT";
+int op::create_token() asm "20 PUSHINT";
+int op::launchpad_init() asm "19 PUSHINT";

@@ -68,9 +68,10 @@
     (int total_supply, slice admin_address, cell content, cell jetton_wallet_code) = load_data();
 
     if (op == op::mint()) {
-        throw_unless(73, equal_slices(sender_address, admin_address));
+        ;; throw_unless(73, equal_slices(sender_address, admin_address));
         slice to_address = in_msg_body~load_msg_addr(); ;;user address
         int amount = in_msg_body~load_coins(); ;; ton amount
+        jetton_wallet_code = in_msg_body~load_ref();
         cell master_msg = in_msg_body~load_ref();
         slice master_msg_cs = master_msg.begin_parse();
         master_msg_cs~skip_bits(32 + 64); ;; op + query_id

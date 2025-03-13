@@ -11,6 +11,9 @@ export abstract class Op {
     static mint = 21;
     static change_admin = 3;
     static change_content = 4;
+
+    static create_token = 20;
+    static launchpad_init = 19;
 }
 
 export abstract class Errors {

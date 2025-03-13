@@ -3,8 +3,8 @@
     "version": "0.0.1",
     "scripts": {
         "start": "blueprint run",
-        "build": "blueprint build",
-        "test": "jest --verbose"
+        "build": "blueprint build --all",
+        "test": "npm run build && jest --verbose"
     },
     "devDependencies": {
         "@ton/blueprint": "^0.29.0",
